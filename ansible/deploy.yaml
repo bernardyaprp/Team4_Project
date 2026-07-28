@@ -1,8 +1,16 @@
+```yaml
 ---
 - hosts: webserver
   become: yes
 
   tasks:
+
+    - name: Pull latest code from GitHub
+      git:
+        repo: https://github.com/mirul49/Team4_Project.git
+        dest: /home/ubuntu/Team4_Project_Main
+        version: newmain
+        force: yes
 
     - name: Stop existing containers
       shell: docker compose down
@@ -18,3 +26,4 @@
       shell: docker compose up -d
       args:
         chdir: /home/ubuntu/Team4_Project_Main
+```
