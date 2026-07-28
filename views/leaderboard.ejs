@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TypeRush Leaderboard</title>
+  <link rel="stylesheet" href="css/game.css">
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <a href="/" class="logo-link">
+      <div class="logo">
+        <img src="/images/TypeRush.jpg" alt="TypeRush logo" class="site-logo">
+        <h1>TypeRush</h1>
+      </div>
+    </a>
+
+    <div class="nav-links">
+      <a href="/leaderboard">Leaderboard</a>
+      <a href="/settings">Settings</a>
+      <a id="authLink" href="/login">Login</a>
+    </div>
+  </nav>
+
+  <main class="container">
+
+    <div class="card leaderboard-header">
+
+      <div>
+        <h2>Leaderboard</h2>
+        <p>
+          Top players are ranked from highest score to lowest score
+          for each time mode.
+        </p>
+      </div>
+
+      <div class="leaderboard-actions">
+        <button
+          type="button"
+          class="difficulty-btn active"
+          data-timelimit="20"
+        >
+          20s
+        </button>
+
+        <button
+          type="button"
+          class="difficulty-btn"
+          data-timelimit="30"
+        >
+          30s
+        </button>
+      </div>
+
+    </div>
+
+
+    <section id="notSignedInBox" class="card" hidden>
+      <h3>You are not signed in</h3>
+
+      <p>
+        Please sign in to see your leaderboard rankings.
+      </p>
+
+      <button type="button" id="signInButton">
+        Sign in to see leaderboard
+      </button>
+    </section>
+
+
+    <section id="leaderboardBox" class="card" hidden>
+
+      <h3 id="welcomeMessage"></h3>
+
+      <p>
+        Your best typing run is saved automatically after
+        20s and 30s tests only.
+      </p>
+
+      <p id="leaderboardMessage" class="auth-message"></p>
+
+      <div class="leaderboard-table-wrapper">
+
+        <table class="leaderboard-table">
+
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Username</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+
+          <tbody id="leaderboardTable"></tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:3000';
+    const USER_STORAGE_KEY = 'typerush-current-user';
+
+    const currentUser = localStorage.getItem(USER_STORAGE_KEY);
+    const notSignedInBox = document.getElementById('notSignedInBox');
+    const leaderboardBox = document.getElementById('leaderboardBox');
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const leaderboardMessage = document.getElementById('leaderboardMessage');
+    const leaderboardTable = document.getElementById('leaderboardTable');
+    const authLink = document.getElementById('authLink');
+    const modeButtons = document.querySelectorAll('.difficulty-btn');
+
+    let selectedTimeLimit = 20;
+
+    document.getElementById('signInButton')
+      .addEventListener('click', () => {
+        window.location.href =
+          '/login?redirect=/leaderboard';
+      });
+
+    function updateAuthenticationDisplay() {
+      if (!currentUser) {
+        notSignedInBox.hidden = false;
+        leaderboardBox.hidden = true;
+
+        authLink.textContent = 'Login';
+        authLink.href =
+          '/login?redirect=/leaderboard';
+
+        return;
+      }
+
+      notSignedInBox.hidden = true;
+      leaderboardBox.hidden = false;
+
+      welcomeMessage.textContent =
+        `Welcome, ${currentUser}!`;
+
+      authLink.textContent = 'Logout';
+      authLink.href = '#';
+
+      authLink.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        localStorage.removeItem(USER_STORAGE_KEY);
+
+        window.location.href = '/login';
+      });
+
+      loadLeaderboard(selectedTimeLimit);
+    }
+
+    function normaliseScores(data) {
+      const possibleLists = [
+        data,
+        data?.leaderboard,
+        data?.scores,
+        data?.results,
+        data?.data
+      ];
+
+      const list =
+        possibleLists.find(Array.isArray) || [];
+
+      return list
+        .map((item) => ({
+          username:
+            item.username ||
+            item.user ||
+            item.name ||
+            'Unknown player',
+
+          score: Number(
+            item.score ??
+            item.wpm ??
+            item.bestScore ??
+            0
+          )
+        }))
+        .filter((item) =>
+          Number.isFinite(item.score)
+        )
+        .sort((a, b) => b.score - a.score);
+    }
+
+    async function loadLeaderboard(timeLimit) {
+      leaderboardTable.innerHTML = '';
+
+      leaderboardMessage.textContent =
+        'Loading leaderboard...';
+
+      leaderboardMessage.className =
+        'auth-message';
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/leaderboard?timeLimit=${encodeURIComponent(timeLimit)}`
+        );
+
+        const contentType =
+          response.headers.get('content-type') || '';
+
+        const result =
+          contentType.includes('application/json')
+            ? await response.json()
+            : { message: await response.text() };
+
+        if (!response.ok) {
+          throw new Error(
+            result.message ||
+            'Unable to load the leaderboard.'
+          );
+        }
+
+        displayScores(
+          normaliseScores(result)
+        );
+
+      } catch (error) {
+
+        leaderboardMessage.textContent =
+          `${error.message} Check that the server is running and that GET /api/leaderboard is available.`;
+
+        leaderboardMessage.className =
+          'auth-message error';
+      }
+    }
+
+    function displayScores(scores) {
+      leaderboardTable.innerHTML = '';
+
+      if (scores.length === 0) {
+
+        leaderboardMessage.textContent =
+          `No scores have been recorded for the ${selectedTimeLimit}s mode yet.`;
+
+        leaderboardMessage.className =
+          'auth-message';
+
+        return;
+      }
+
+      leaderboardMessage.textContent =
+        `${selectedTimeLimit}s leaderboard`;
+
+      leaderboardMessage.className =
+        'auth-message success';
+
+      scores.forEach((player, index) => {
+
+        const row =
+          document.createElement('tr');
+
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${player.username}</td>
+          <td>${player.score} WPM</td>
+        `;
+
+        if (
+          player.username === currentUser
+        ) {
+          row.classList.add(
+            'current-user-row'
+          );
+        }
+
+        leaderboardTable.appendChild(row);
+      });
+    }
+
+    modeButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+
+        modeButtons.forEach((item) =>
+          item.classList.remove('active')
+        );
+
+        button.classList.add('active');
+
+        selectedTimeLimit =
+          Number(button.dataset.timelimit);
+
+        if (currentUser) {
+          loadLeaderboard(selectedTimeLimit);
+        }
+      });
+    });
+
+    updateAuthenticationDisplay();
+  </script>
+
+</body>
+</html>

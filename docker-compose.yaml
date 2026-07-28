@@ -1,0 +1,36 @@
+services:
+
+  typerush:
+    build: .
+    container_name: typerush-app
+
+    ports:
+      - "3000:3000"
+
+    env_file:
+      - .env
+
+    depends_on:
+      - mysql
+
+    restart: unless-stopped
+
+
+  mysql:
+    image: mysql:8.0
+    container_name: typerush-mysql
+
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: typerush_db
+      MYSQL_USER: typerush
+      MYSQL_PASSWORD: RP738964$
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    restart: unless-stopped
+
+
+volumes:
+  mysql_data:

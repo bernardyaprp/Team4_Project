@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>TypeRush - Result</title>
+
+  <link rel="stylesheet" href="css/game.css">
+</head>
+
+<body>
+
+  <!-- Navigation bar -->
+  <nav class="navbar">
+
+    <a href="/" class="logo">
+      TypeRush
+    </a>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/game">Game</a>
+      <a href="/login">Login</a>
+      <a href="/leaderboard">Leaderboard</a>
+      <a href="/instructions">Instructions</a>
+      <a href="/settings">Settings</a>
+    </div>
+
+  </nav>
+
+
+  <!-- Result page -->
+  <main class="result-page">
+
+    <section class="result-card">
+
+      <p class="result-label">
+        Game Complete
+      </p>
+
+      <h1>Great typing!</h1>
+
+      <p class="result-message" id="resultMessage">
+        Here is your final TypeRush result.
+      </p>
+
+
+      <!-- Main score -->
+      <div class="final-score">
+
+        <span>Final Score</span>
+
+        <strong id="resultScore">
+          0
+        </strong>
+
+      </div>
+
+
+      <!-- Result statistics -->
+      <div class="result-stats">
+
+        <div class="result-stat">
+          <span>Player</span>
+          <strong id="resultUsername">Guest</strong>
+        </div>
+
+        <div class="result-stat">
+          <span>Difficulty</span>
+          <strong id="resultDifficulty">Easy</strong>
+        </div>
+
+        <div class="result-stat">
+          <span>Accuracy</span>
+          <strong>
+            <span id="resultAccuracy">100</span>%
+          </strong>
+        </div>
+
+        <div class="result-stat">
+          <span>Correct Words</span>
+          <strong id="resultCorrect">0</strong>
+        </div>
+
+        <div class="result-stat">
+          <span>Total Attempts</span>
+          <strong id="resultAttempts">0</strong>
+        </div>
+
+      </div>
+
+
+      <!-- Result buttons -->
+      <div class="result-buttons">
+
+        <a href="/game" class="primary-button result-link">
+          Play Again
+        </a>
+
+        <a href="/leaderboard" class="secondary-button result-link">
+          View Leaderboard
+        </a>
+
+        <a href="/" class="home-result-link">
+          Return Home
+        </a>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <script src="/js/result.js"></script>
+
+</body>
+
+</html>

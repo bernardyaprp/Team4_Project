@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TypeRush - Settings</title>
+  <link rel="stylesheet" href="css/game.css">
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <a href="/" class="logo-link">
+      <div class="logo">
+        <img src="/images/TypeRush.jpg" alt="TypeRush logo" class="site-logo">
+        <h1>TypeRush</h1>
+      </div>
+    </a>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/leaderboard">Leaderboard</a>
+      <a href="/login">Login</a>
+    </div>
+  </nav>
+
+  <main class="container">
+
+    <div class="card settings-header">
+      <div>
+        <h2>Settings</h2>
+        <p>
+          Adjust test behavior, difficulty, and end-of-test word history.
+        </p>
+      </div>
+    </div>
+
+    <section class="card settings-card">
+
+      <div class="setting-row">
+
+        <div class="setting-info">
+          <h3>Difficulty</h3>
+
+          <p>
+            Normal is the classic typing test experience.
+            Expert will fail the test when you submit an incorrect word.
+            Master fails immediately if you press any incorrect key.
+          </p>
+        </div>
+
+        <div
+          class="setting-actions"
+          role="group"
+          aria-label="Difficulty"
+          data-setting="difficulty"
+        >
+          <button
+            type="button"
+            class="difficulty-btn active"
+            data-value="normal"
+          >
+            Normal
+          </button>
+
+          <button
+            type="button"
+            class="difficulty-btn"
+            data-value="expert"
+          >
+            Expert
+          </button>
+
+          <button
+            type="button"
+            class="difficulty-btn"
+            data-value="master"
+          >
+            Master
+          </button>
+        </div>
+
+      </div>
+
+
+      <div class="setting-row">
+
+        <div class="setting-info">
+          <h3>Blind Mode</h3>
+
+          <p>
+            Hide real-time error highlighting while typing.
+          </p>
+        </div>
+
+        <div
+          class="setting-actions"
+          role="group"
+          aria-label="Blind mode"
+          data-setting="blindMode"
+        >
+          <button
+            type="button"
+            class="difficulty-btn active"
+            data-value="off"
+          >
+            Off
+          </button>
+
+          <button
+            type="button"
+            class="difficulty-btn"
+            data-value="on"
+          >
+            On
+          </button>
+        </div>
+
+      </div>
+
+
+      <div class="setting-row">
+
+        <div class="setting-info">
+          <h3>Minimum Accuracy</h3>
+
+          <p>
+            Automatically fails a test if your accuracy falls below
+            the selected threshold.
+          </p>
+        </div>
+
+        <div class="setting-control">
+
+          <input
+            class="setting-input"
+            type="number"
+            value="90"
+            min="0"
+            max="100"
+            aria-label="Minimum accuracy threshold"
+          >
+
+          <div
+            class="setting-actions"
+            role="group"
+            aria-label="Minimum accuracy"
+          >
+            <button
+              type="button"
+              class="difficulty-btn active"
+            >
+              Off
+            </button>
+
+            <button
+              type="button"
+              class="difficulty-btn"
+            >
+              Custom
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <script>
+    const SETTINGS_KEY_MAP = {
+      difficulty: 'typerush-setting-difficulty',
+      blindMode: 'typerush-setting-blindMode'
+    };
+
+    function readSetting(key, defaultValue) {
+      const saved = localStorage.getItem(SETTINGS_KEY_MAP[key]);
+      return saved !== null ? saved : defaultValue;
+    }
+
+    function applySetting(group, value) {
+      group.querySelectorAll('button').forEach((button) => {
+        button.classList.toggle(
+          'active',
+          button.dataset.value === value
+        );
+      });
+    }
+
+    function saveSetting(key, value) {
+      localStorage.setItem(
+        SETTINGS_KEY_MAP[key],
+        value
+      );
+    }
+
+    document
+      .querySelectorAll('.setting-actions[data-setting]')
+      .forEach((group) => {
+
+        const setting = group.dataset.setting;
+
+        const defaultValue =
+          setting === 'difficulty'
+            ? 'normal'
+            : 'off';
+
+        const savedValue =
+          readSetting(setting, defaultValue);
+
+        applySetting(group, savedValue);
+
+        group.addEventListener('click', (event) => {
+
+          const button =
+            event.target.closest('button');
+
+          if (!button) return;
+
+          const value =
+            button.dataset.value ||
+            button.textContent.trim();
+
+          applySetting(group, value);
+          saveSetting(setting, value);
+        });
+      });
+  </script>
+
+</body>
+</html>

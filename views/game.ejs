@@ -1,0 +1,41 @@
+<%- include('partials/header') %>
+<%- include('partials/nav') %>
+<link rel="stylesheet" href="css/game.css">
+<main class="page-container">
+
+  <!-- Player information -->
+  <section class="player-panel">
+
+    <div class="player-message">
+      <p class="eyebrow">Player Account</p>
+
+      <h2 id="loginHeading">
+        Play as a guest
+      </h2>
+
+      <p id="loginDescription">
+        Log in or create an account to save your result to the leaderboard.
+      </p>
+    </div>
+
+    <div id="guestActions" class="guest-actions">
+      <a href="/login" class="primary-button account-link">
+        Log In
+      </a>
+
+      <a href="/register" class="secondary-button account-link">
+        Register
+      </a>
+    </div>
+
+    <strong id="userStatus" class="player-name" hidden>
+      Guest
+    </strong>
+
+  </section>
+
+  <!-- Rest of your game content here -->
+
+</main>
+
+<%- include('partials/footer') %>
