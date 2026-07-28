@@ -1,4 +1,3 @@
-```yaml
 ---
 - hosts: webserver
   become: yes
@@ -26,4 +25,3 @@
       shell: docker compose up -d
       args:
         chdir: /home/ubuntu/Team4_Project_Main
-```
