@@ -5,7 +5,7 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-                git branch: 'main',
+                git branch: 'newmain',
                     url: 'https://github.com/mirul49/Team4_Project.git'
             }
         }
