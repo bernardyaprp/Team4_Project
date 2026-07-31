@@ -1,0 +1,75 @@
+name: Trivy Security Scan
+
+on:
+  push:
+    branches: [newmain]
+  pull_request:
+    branches: [newmain]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trivy-scan:
+    name: Scan TypeRush
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Scan source code and dependencies
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          output: trivy-filesystem.txt
+          exit-code: '0'
+
+      - name: Build TypeRush Docker image
+        run: docker build -t typerush:${{ github.sha }} .
+
+      - name: Scan TypeRush Docker image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          image-ref: typerush:${{ github.sha }}
+          scanners: vuln
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          output: trivy-image.txt
+          exit-code: '0'
+          skip-setup-trivy: true
+
+      - name: Show reports in GitHub Actions summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Trivy filesystem scan"
+            echo '```text'
+            cat trivy-filesystem.txt 2>/dev/null || echo "Filesystem report was not generated."
+            echo '```'
+            echo "## Trivy Docker image scan"
+            echo '```text'
+            cat trivy-image.txt 2>/dev/null || echo "Image report was not generated."
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Trivy reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typerush-trivy-reports
+          path: |
+            trivy-filesystem.txt
+            trivy-image.txt
+          if-no-files-found: warn
+          retention-days: 30
