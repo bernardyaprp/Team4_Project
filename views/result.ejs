@@ -1,127 +1,231 @@
-<!DOCTYPE html>
-<html lang="en">
+<%- include('partials/header') %>
+<%- include('partials/nav') %>
 
-<head>
-  <meta charset="UTF-8">
+<main class="result-page">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <!-- Result card -->
+  <section class="result-card">
 
-  <title>TypeRush - Result</title>
+    <p class="result-label">
+      Game Complete
+    </p>
 
-  <link rel="stylesheet" href="css/game.css">
-</head>
+    <h1>
+      Great typing!
+    </h1>
 
-<body>
+    <p class="result-message" id="resultMessage">
+      Here is your final TypeRush result.
+    </p>
 
-  <!-- Navigation bar -->
-  <nav class="navbar">
 
-    <a href="/" class="logo">
-      TypeRush
-    </a>
+    <!-- Main score -->
+    <div class="final-score">
 
-    <div class="nav-links">
-      <a href="/">Home</a>
-      <a href="/game">Game</a>
-      <a id="authLink" href="/login">Login</a>
-      <a href="/leaderboard">Leaderboard</a>
-      <a href="/instructions">Instructions</a>
-      <a href="/settings">Settings</a>
+      <span>
+        Final Score
+      </span>
+
+      <strong id="resultScore">
+        0
+      </strong>
+
     </div>
 
-  </nav>
 
-  <script src="/js/auth-nav.js" defer></script>
+    <!-- Result statistics -->
+    <div class="result-stats">
 
+      <div class="result-stat">
+        <span>
+          Player
+        </span>
 
-  <!-- Result page -->
-  <main class="result-page">
-
-    <section class="result-card">
-
-      <p class="result-label">
-        Game Complete
-      </p>
-
-      <h1>Great typing!</h1>
-
-      <p class="result-message" id="resultMessage">
-        Here is your final TypeRush result.
-      </p>
+        <strong id="resultUsername">
+          Guest
+        </strong>
+      </div>
 
 
-      <!-- Main score -->
-      <div class="final-score">
+      <div class="result-stat">
+        <span>
+          Difficulty
+        </span>
 
-        <span>Final Score</span>
+        <strong id="resultDifficulty">
+          -
+        </strong>
+      </div>
 
-        <strong id="resultScore">
+
+      <div class="result-stat">
+        <span>
+          Accuracy
+        </span>
+
+        <strong>
+          <span id="resultAccuracy">
+            100
+          </span>%
+        </strong>
+      </div>
+
+
+      <div class="result-stat">
+        <span>
+          Correct Words
+        </span>
+
+        <strong id="resultCorrect">
           0
         </strong>
-
       </div>
 
 
-      <!-- Result statistics -->
-      <div class="result-stats">
+      <div class="result-stat">
+        <span>
+          Total Attempts
+        </span>
 
-        <div class="result-stat">
-          <span>Player</span>
-          <strong id="resultUsername">Guest</strong>
-        </div>
-
-        <div class="result-stat">
-          <span>Difficulty</span>
-          <strong id="resultDifficulty">Easy</strong>
-        </div>
-
-        <div class="result-stat">
-          <span>Accuracy</span>
-          <strong>
-            <span id="resultAccuracy">100</span>%
-          </strong>
-        </div>
-
-        <div class="result-stat">
-          <span>Correct Words</span>
-          <strong id="resultCorrect">0</strong>
-        </div>
-
-        <div class="result-stat">
-          <span>Total Attempts</span>
-          <strong id="resultAttempts">0</strong>
-        </div>
-
+        <strong id="resultAttempts">
+          0
+        </strong>
       </div>
 
-
-      <!-- Result buttons -->
-      <div class="result-buttons">
-
-        <a href="/game" class="primary-button result-link">
-          Play Again
-        </a>
-
-        <a href="/leaderboard" class="secondary-button result-link">
-          View Leaderboard
-        </a>
-
-        <a href="/" class="home-result-link">
-          Return Home
-        </a>
-
-      </div>
-
-    </section>
-
-  </main>
+    </div>
 
 
-  <script src="/js/result.js"></script>
+    <!-- Result buttons -->
+    <div class="result-buttons">
 
-</body>
+      <a href="/game" class="primary-button result-link">
+        Play Again
+      </a>
 
-</html>
+      <a href="/leaderboard" class="secondary-button result-link">
+        View Leaderboard
+      </a>
+
+      <a href="/" class="home-result-link">
+        Return Home
+      </a>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+
+// Get latest game result from sessionStorage
+
+function getLatestResult() {
+
+  const savedResult =
+    sessionStorage.getItem(
+      "latestGameResult"
+    );
+
+  if (!savedResult) {
+    return null;
+  }
+
+  try {
+
+    return JSON.parse(savedResult);
+
+  } catch(error) {
+
+    return null;
+
+  }
+
+}
+
+
+// Display result information
+
+function displayResult() {
+
+  const result = getLatestResult();
+
+  // No game result found
+
+  if (!result) {
+    document.getElementById(
+      "resultMessage"
+    ).textContent = "No completed game was found. Play a game to see your result.";
+
+    document.getElementById( "resultScore" ).textContent = "0";
+    document.getElementById( "resultUsername" ).textContent = "Guest";
+    document.getElementById( "resultDifficulty" ).textContent = "-";
+    document.getElementById( "resultAccuracy" ).textContent = "0";
+    document.getElementById( "resultCorrect" ).textContent = "0";
+    document.getElementById( "resultAttempts" ).textContent = "0";
+
+    return;
+
+  }
+
+
+  document.getElementById( "resultScore" ).textContent = result.score;
+  document.getElementById( "resultUsername" ).textContent = result.username;
+  document.getElementById( "resultDifficulty" ).textContent = result.difficulty;
+  document.getElementById( "resultAccuracy" ).textContent = result.accuracy;
+  document.getElementById( "resultCorrect" ).textContent = result.correctWords;
+  document.getElementById( "resultAttempts" ).textContent = result.totalWords;
+
+  displayResultMessage(result);
+
+}
+
+
+// Result message based on accuracy
+
+function displayResultMessage(result) {
+
+  const message = document.getElementById( "resultMessage" );
+
+  if (
+    result.totalWords === 0
+  ) {
+
+    message.textContent =
+      "You did not enter any words. Try again and start typing!";
+
+  } else if (
+    result.accuracy === 100
+  ) {
+
+    message.textContent = "Perfect accuracy! You completed every word correctly.";
+
+  } else if (
+    result.accuracy >= 80
+  ) {
+
+    message.textContent = "Excellent result! Your typing was fast and accurate.";
+
+  } else if (
+    result.accuracy >= 60
+  ) {
+
+    message.textContent = "Good attempt! Keep practising to improve your accuracy.";
+
+  } else {
+
+    message.textContent = "Keep practising! Focus on accuracy before increasing your speed.";
+
+  }
+
+}
+
+
+// Start result page
+
+displayResult();
+
+</script>
+
+
+<%- include('partials/footer') %>
