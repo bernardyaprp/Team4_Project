@@ -10,17 +10,28 @@
       args:
         chdir: /home/ubuntu/Team4_Project_Main
 
-    - name: Stop existing containers
+    - name: Stop existing docker-compose containers if any are running
       shell: docker compose down
       args:
         chdir: /home/ubuntu/Team4_Project_Main
+      ignore_errors: yes
 
-    - name: Build Docker image
-      shell: docker compose build
+    - name: Install or update k3s with an expanded NodePort range
+      shell: |
+        curl -sfL https://get.k3s.io | sh -s - --kube-apiserver-arg=service-node-port-range=3000-32767
+
+    - name: Build the app image
+      shell: docker build -t typerush:local .
       args:
         chdir: /home/ubuntu/Team4_Project_Main
 
-    - name: Start application
-      shell: docker compose up -d
+    - name: Import the image into k3s
+      shell: |
+        docker save typerush:local -o /tmp/typerush.tar
+        k3s ctr -n k8s.io images import /tmp/typerush.tar
+        rm /tmp/typerush.tar
+
+    - name: Apply Kubernetes manifests
+      shell: k3s kubectl apply -f k8s/
       args:
         chdir: /home/ubuntu/Team4_Project_Main
