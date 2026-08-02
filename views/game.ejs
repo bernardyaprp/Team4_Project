@@ -1136,7 +1136,7 @@
 
 
       // SAVE SCORE TO LEADERBOARD
-      function saveScore(result) {
+      async function saveScore(result) {
 
         const username = getLoggedInUser();
 
@@ -1151,75 +1151,30 @@
           return;
         }
 
-        const key = "typerush-leaderboard";
-
-        let scores = [];
 
         try {
 
-          scores =
-            JSON.parse(
-              localStorage.getItem(key)
-            ) || [];
+          await fetch("/api/leaderboard", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+
+            body: JSON.stringify({
+              username: username,
+              score: result.score,
+              wpm: result.wpm,
+              accuracy: result.accuracy,
+              timeLimit: result.duration,
+              difficulty: result.difficulty
+            })
+          });
 
         } catch (error) {
 
-          scores = [];
-
-        }
-
-        const newScore = {
-
-          username: username,
-          score: Number(result.score),
-          accuracy: Number(result.accuracy),
-          timeLimit: Number(result.duration),
-          difficulty: result.difficulty,
-          wpm: Number(result.wpm)
-
-        };
-
-
-        const existing =
-          scores.findIndex(
-            function (entry) {
-
-              return (
-                entry.username === username &&
-                entry.timeLimit === result.duration
-              );
-
-            }
+          console.error(
+            "Failed to save score:",
+            error
           );
-
-        if (existing === -1) {
-
-          scores.push(newScore);
-
-        } else if (
-          newScore.score >
-          scores[existing].score
-        ) {
-
-          scores[existing] = newScore;
-
         }
-
-
-        scores.sort(
-          function (a, b) {
-
-            return b.score - a.score;
-
-          }
-        );
-
-
-        localStorage.setItem(
-          key,
-          JSON.stringify(scores)
-        );
-
       }
 
 
