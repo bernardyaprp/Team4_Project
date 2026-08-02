@@ -1,8 +1,139 @@
 <%- include('partials/header') %>
-<%- include('partials/nav') %>
-<link rel="stylesheet" href="css/game.css">
-<main class="home-page">
-  <h1>Welcome to TypeRush</h1>
-</main>
-<p>This website is live at 29 July 2026</p>
-<%- include('partials/footer') %>
+  <%- include('partials/nav') %>
+
+    <link rel="stylesheet" href="/css/game.css">
+
+    <main class="page-container home-page">
+
+      <!-- Welcome -->
+      <section class="home-welcome">
+
+        <h1>
+          Welcome to TypeRush
+        </h1>
+
+        <p>
+          Test your typing speed, improve your accuracy,
+          and compete with other players.
+        </p>
+
+        <div class="game-actions">
+
+          <a href="/game" class="primary-button">
+            Play TypeRush
+          </a>
+
+
+          <a href="/instructions" class="secondary-button">
+            How to Play
+          </a>
+
+        </div>
+
+      </section>
+
+
+      <!-- Login/Register -->
+      <section class="account-card">
+
+
+        <div>
+
+          <h2>
+            Save Your Progress
+          </h2>
+
+
+          <p>
+            Create an account or login to save your typing records
+            and appear on the leaderboard.
+          </p>
+
+
+        </div>
+
+        <div class="game-actions">
+
+          <a href="/login" class="primary-button">
+            Login
+          </a>
+
+          <a href="/register" class="secondary-button">
+            Register
+          </a>
+
+
+        </div>
+
+
+      </section>
+
+
+      <section class="card">
+
+        <h2>
+          Why Choose TypeRush?
+        </h2>
+
+        <div class="typing-stats-panel">
+
+          <div class="stat-item">
+            <span class="stat-label">
+              ⚡ Speed
+            </span>
+
+            <span class="stat-value">
+              Improve your typing speed.
+            </span>
+          </div>
+
+
+          <div class="stat-item">
+            <span class="stat-label">
+              🎯 Accuracy
+            </span>
+
+            <span class="stat-value">
+              Increase typing accuracy.
+            </span>
+          </div>
+
+
+          <div class="stat-item">
+            <span class="stat-label">
+              🏆 Leaderboard
+            </span>
+
+            <span class="stat-value">
+              Compete with other players.
+            </span>
+          </div>
+
+
+          <div class="stat-item">
+            <span class="stat-label">
+              ⚙ Difficulty
+            </span>
+
+            <span class="stat-value">
+              Normal, Expert and Master.
+            </span>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    <footer class="home-footer">
+
+      <p>
+        This website is live at 29 July 2026
+      </p>
+
+      <p>
+        © 2026 TypeRush
+      </p>
+
+    </footer>

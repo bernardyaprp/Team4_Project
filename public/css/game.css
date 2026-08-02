@@ -366,6 +366,7 @@ input {
   border-radius: 999px;
   font-weight: bold;
   cursor: pointer;
+  text-decoration: none;
   transition:
     transform 0.2s ease,
     background 0.2s ease;
@@ -393,6 +394,10 @@ input {
   background: #d8ebf9;
 }
 
+.primary-button:hover,
+.secondary-button:hover {
+  text-decoration: none;
+}
 
 /* STATISTICS */
 
@@ -1145,3 +1150,134 @@ input {
   color: #1e3a8a;
   font-weight: 700;
 }
+
+/* HOME PAGE */
+
+.home-page {
+  width: min(1100px, 92%);
+  margin: auto;
+}
+
+.home-welcome {
+  text-align: center;
+  padding: 35px 20px 20px;
+}
+
+.home-welcome h1 {
+  font-size: 42px;
+  margin: 0 0 15px;
+  color: #172033;
+}
+
+.home-welcome p {
+  max-width: 650px;
+  margin: 0 auto;
+  color: #64748b;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.home-welcome .game-actions {
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.home-page .card {
+  margin-top: 20px;
+}
+
+
+/* LOGIN / REGISTER PANEL */
+
+.account-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+  background: white;
+  border: 1px solid #dce7f3;
+  border-radius: 18px;
+  padding: 25px 30px;
+  box-shadow: 0 14px 34px rgba(56,94,143,0.12);
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.account-card h2 {
+  margin: 5px 0;
+  font-size: 22px;
+}
+
+.account-card p {
+  color: #64748b;
+  margin: 8px 0 0;
+}
+
+.account-card .game-actions {
+  flex-shrink: 0;
+}
+
+
+/* FOOTER */
+
+.home-footer {
+  width: min(1100px,92%);
+  margin: 40px auto;
+  color: #64748b;
+}
+
+.home-footer p {
+  margin: 5px 0;
+}
+
+
+@media(max-width:800px) {
+  .account-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* HOME FEATURES */
+
+.typing-stats-panel {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-top: 25px;
+}
+
+.stat-item {
+  padding: 22px;
+  background: #f8fbff;
+  border: 1px solid #dce7f3;
+  border-radius: 15px;
+}
+
+.stat-label {
+  display: block;
+  margin-bottom: 12px;
+  color: #2563eb;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.stat-value {
+  color: #64748b;
+  line-height: 1.5;
+}
+
+
+@media(max-width:900px) {
+  .typing-stats-panel {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
+@media(max-width:520px) {
+  .typing-stats-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
