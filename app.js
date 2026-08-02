@@ -47,13 +47,16 @@ async function initializeDatabase() {
 
         // Scores table
         await connection.query(`
-            CREATE TABLE IF NOT EXISTS scores (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                username VARCHAR(50) NOT NULL,
-                score INT NOT NULL DEFAULT 0,
-                time_mode INT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE KEY unique_user_time (username, time_mode)
+        CREATE TABLE IF NOT EXISTS scores (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            username VARCHAR(50) NOT NULL,
+            score INT NOT NULL DEFAULT 0,
+            wpm INT NOT NULL DEFAULT 0,
+            accuracy INT NOT NULL DEFAULT 0,
+            time_mode INT NOT NULL,
+            difficulty VARCHAR(20),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_user_time (username, time_mode)
             )
         `);
 
@@ -335,6 +338,95 @@ app.post('/api/logout', (req, res) => {
         res.clearCookie('connect.sid');
         res.json({ message: 'Logged out.' });
     });
+});
+
+// =========================
+// LEADERBOARD API
+// =========================
+
+app.get('/api/leaderboard', async (req, res) => {
+
+    const timeLimit = req.query.timeLimit;
+    try {
+        const [rows] = await pool.query(
+            `
+            SELECT 
+                username,
+                score,
+                wpm,
+                accuracy
+            FROM scores
+            WHERE time_mode = ?
+            ORDER BY score DESC
+            `,
+            [timeLimit]
+        );
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Failed to load leaderboard"
+        });
+    }
+});
+
+app.post('/api/leaderboard', async (req, res) => {
+
+    const {
+        username,
+        score,
+        wpm,
+        accuracy,
+        timeLimit,
+        difficulty
+    } = req.body;
+
+    try {
+
+        await pool.query(
+            `
+            INSERT INTO scores
+            (
+                username,
+                score,
+                wpm,
+                accuracy,
+                time_mode,
+                difficulty
+            )
+
+            VALUES (?, ?, ?, ?, ?, ?)
+
+            ON DUPLICATE KEY UPDATE
+
+            score = GREATEST(score, VALUES(score)),
+            wpm = VALUES(wpm),
+            accuracy = VALUES(accuracy)
+
+            `,
+            [
+                username,
+                score,
+                wpm,
+                accuracy,
+                timeLimit,
+                difficulty
+            ]
+        );
+
+        res.json({
+            message: "Score saved"
+        });
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            message: "Failed to save score"
+        });
+    }
 });
 
 // =========================

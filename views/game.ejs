@@ -1,8 +1,6 @@
 <%- include('partials/header') %>
   <%- include('partials/nav') %>
 
-    <link rel="stylesheet" href="/css/game.css">
-
     <main class="page-container">
 
       <!-- Player information -->
@@ -61,7 +59,6 @@
 
           </div>
 
-
           <div class="game-actions">
 
             <button id="startBtn" class="primary-button" type="button">
@@ -79,6 +76,101 @@
           </div>
 
         </div>
+
+
+        <!-- Game Customisation Settings -->
+        <section class="game-options">
+
+          <!-- Time Selection -->
+          <div class="option-section">
+
+            <h3>
+              Time
+            </h3>
+
+            <div class="option-buttons">
+
+              <button class="option-button time-option" data-time="10">
+                10s
+              </button>
+
+              <button class="option-button time-option active" data-time="20">
+                20s
+              </button>
+
+              <button class="option-button time-option" data-time="30">
+                30s
+              </button>
+
+              <button class="option-button time-option" data-time="45">
+                45s
+              </button>
+
+              <button class="option-button time-option" data-time="60">
+                60s
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- Word Count Selection -->
+          <div class="option-section">
+
+            <h3>
+              Words
+            </h3>
+
+            <div class="option-buttons">
+
+              <button class="option-button word-option" data-word="15">
+                15
+              </button>
+
+              <button class="option-button word-option active" data-word="25">
+                25
+              </button>
+
+              <button class="option-button word-option" data-word="35">
+                35
+              </button>
+
+              <button class="option-button word-option" data-word="50">
+                50
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- Feature Selection -->
+          <div class="option-section">
+
+            <h3>
+              Features
+            </h3>
+
+            <div class="option-buttons">
+
+              <button class="option-button feature-option" data-feature="punctuation">
+                Punctuation
+              </button>
+
+              <button class="option-button feature-option" data-feature="numbers">
+                Numbers
+              </button>
+
+              <button class="option-button feature-option" data-feature="caps">
+                Caps
+              </button>
+
+            </div>
+
+          </div>
+
+        </section>
 
 
         <!-- Current game settings -->
@@ -100,19 +192,34 @@
           <div class="selected-setting">
 
             <span>
-              Duration
+              Blind Mode
             </span>
 
-            <strong>
-              <span id="durationText">
-                20
-              </span>s
+            <strong id="blindModeText">
+              Off
             </strong>
 
           </div>
 
-        </section>
 
+          <div class="selected-setting">
+
+            <span>
+              Duration
+            </span>
+
+            <strong>
+              <span id="durationText">20</span>s
+            </strong>
+
+          </div>
+
+          <div class="selected-setting">
+            <span>Words</span>
+            <strong id="wordCountText">25</strong>
+          </div>
+
+        </section>
 
         <!-- Game statistics -->
         <section class="stats-grid">
@@ -138,7 +245,7 @@
               Word Count
             </span>
 
-            <strong id="wordCountText">
+            <strong id="currentWordCountText">
               0
             </strong>
 
@@ -175,23 +282,19 @@
         </section>
 
 
-        <!-- Game status -->
-        <div class="current-settings">
-
-          <span class="status-dot"></span>
-
+        <!-- Game Status -->
+        <div class="game-status">
           <span id="gameState">
             Ready
           </span>
 
-          <span class="settings-separator">
+          <span>
             •
           </span>
 
           <span id="modeDescription">
             Classic typing mode
           </span>
-
         </div>
 
 
@@ -221,7 +324,6 @@
     <script>
 
       // TYPE RUSH WORD LIST
-
       const words = [
         "apple", "window", "keyboard", "typing", "school",
         "browser", "planet", "coffee", "student", "holiday",
@@ -236,10 +338,19 @@
         "master"
       ];
 
+
       // GAME SETTINGS
       let selectedDifficulty = "Normal";
       let selectedDuration = 20;
+      let selectedWordCount = 25;
+
       let blindMode = "off";
+      let minimumAccuracy = 0;
+
+      let enablePunctuation = false;
+      let enableNumbers = false;
+      let enableCaps = false;
+
 
       // GAME VARIABLES
       let timeLeft = 20;
@@ -253,6 +364,36 @@
       let correctCharacters = 0;
       let incorrectCharacters = 0;
 
+      // SAVE GAME SETTINGS
+      function saveGameSettings() {
+
+        localStorage.setItem(
+          "typerush-game-duration",
+          selectedDuration
+        );
+
+        localStorage.setItem(
+          "typerush-game-wordCount",
+          selectedWordCount
+        );
+
+        localStorage.setItem(
+          "typerush-game-punctuation",
+          enablePunctuation
+        );
+
+        localStorage.setItem(
+          "typerush-game-numbers",
+          enableNumbers
+        );
+
+        localStorage.setItem(
+          "typerush-game-caps",
+          enableCaps
+        );
+
+      }
+
 
       // HTML ELEMENTS
       const startBtn = document.getElementById("startBtn");
@@ -262,9 +403,11 @@
       const timeText = document.getElementById("timeText");
       const durationText = document.getElementById("durationText");
       const wordCountText = document.getElementById("wordCountText");
+      const currentWordCountText = document.getElementById("currentWordCountText");
       const wpmText = document.getElementById("wpmText");
       const accuracyText = document.getElementById("accuracyText");
       const difficultyText = document.getElementById("difficultyText");
+      const blindModeText = document.getElementById("blindModeText");
       const gameState = document.getElementById("gameState");
       const modeDescription = document.getElementById("modeDescription");
       const message = document.getElementById("messageText");
@@ -275,158 +418,162 @@
 
 
       // USER LOGIN HANDLING
-
       function getLoggedInUser() {
 
-        const username =
-          localStorage.getItem(
-            "typerush-current-user"
-          );
+        const username = localStorage.getItem("typerush-current-user");
 
-        if (
-          !username ||
-          username === "undefined"
-        ) {
+        if (!username || username === "undefined") {
           return null;
         }
-
         return username.trim();
-
       }
 
       function loadUser() {
 
-        const username =
-          getLoggedInUser();
+        const username = getLoggedInUser();
 
         if (username) {
 
-          userStatus.textContent =
-            username;
-
-          userStatus.hidden =
-            false;
-
-          guestActions.hidden =
-            true;
-
-          loginHeading.textContent =
-            "Hello, " + username + "!";
-
-          loginDescription.textContent =
-            "Your result will be saved to the leaderboard.";
+          userStatus.textContent = username;
+          userStatus.hidden = false;
+          guestActions.hidden = true;
+          loginHeading.textContent = "Hello, " + username + "!";
+          loginDescription.textContent = "Your result will be saved to the leaderboard.";
 
         } else {
 
-          userStatus.textContent =
-            "Guest";
-
-          userStatus.hidden =
-            true;
-
-          guestActions.hidden =
-            false;
-
-          loginHeading.textContent =
-            "Play as a guest";
-
-          loginDescription.textContent =
-            "Log in or create an account to save your result to the leaderboard.";
+          userStatus.hidden = true;
+          guestActions.hidden = false;
+          loginHeading.textContent = "Play as a guest";
+          loginDescription.textContent = "Log in or create an account to save your result to the leaderboard.";
 
         }
 
       }
 
 
-      // LOAD SAVED GAME SETTINGS
-
+      // LOAD GAME SETTINGS
       function loadGameSettings() {
-        const savedDifficultyRaw = localStorage.getItem("typerush-setting-difficulty");
 
-        const savedDifficulty = savedDifficultyRaw
-          ? savedDifficultyRaw.charAt(0).toUpperCase() + savedDifficultyRaw.slice(1).toLowerCase()
-          : null;
+        selectedDifficulty =
+          localStorage.getItem(
+            "typerush-setting-difficulty"
+          ) || "normal";
 
-        const savedDuration = Number(localStorage.getItem("gameDuration"));
+        blindMode =
+          localStorage.getItem(
+            "typerush-setting-blindMode"
+          ) || "off";
 
-        const validDifficulties = [
-          "Normal",
-          "Expert",
-          "Master"
-        ];
-
-        const validDurations = [
-          20,
-          30
-        ];
-
-        const savedBlindMode = localStorage.getItem("typerush-setting-blindMode");
-
-        blindMode = savedBlindMode === "on" ? "on" : "off";
-
-        if (validDifficulties.includes(savedDifficulty)) {
-          selectedDifficulty = savedDifficulty;
-        } else {
-          selectedDifficulty = "Normal";
-        }
-
-        if (validDurations.includes(savedDuration)) {
-          selectedDuration = savedDuration;
-        } else {
-          selectedDuration = 20;
-        }
-
-        timeLeft = selectedDuration;
+        selectedDifficulty = selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1);
 
         difficultyText.textContent = selectedDifficulty;
-        durationText.textContent = selectedDuration;
-        timeText.textContent = selectedDuration;
+
+        blindModeText.textContent =
+          blindMode === "on"
+            ? "On"
+            : "Off";
 
         displayModeDescription();
+
+        selectedDuration = Number(localStorage.getItem("typerush-game-duration")) || 20;
+        selectedWordCount = Number(localStorage.getItem("typerush-game-wordCount")) || 25;
+        enablePunctuation = localStorage.getItem("typerush-game-punctuation") === "true";
+        enableNumbers = localStorage.getItem("typerush-game-numbers") === "true";
+        enableCaps = localStorage.getItem("typerush-game-caps") === "true";
+        durationText.textContent = selectedDuration;
+        wordCountText.textContent = selectedWordCount;
+        timeText.textContent = selectedDuration;
+
       }
 
 
       // DISPLAY MODE DESCRIPTION
-
       function displayModeDescription() {
+
         if (selectedDifficulty === "Expert") {
-          modeDescription.textContent =
-            "Incorrect submitted word ends the test";
+          modeDescription.textContent = "Incorrect submitted word ends the test";
         } else if (selectedDifficulty === "Master") {
-          modeDescription.textContent =
-            "Incorrect character ends the test immediately";
+          modeDescription.textContent = "Incorrect character ends the test immediately";
         } else {
-          modeDescription.textContent =
-            "Classic typing mode";
+          modeDescription.textContent = "Classic typing mode";
         }
 
         if (blindMode === "on") {
+
           modeDescription.textContent += " • Blind Mode";
+
         }
+
       }
 
 
       // GENERATE GAME WORDS
+      function generateGameWords(amount = selectedWordCount) {
 
-      function generateGameWords(amount = 120) {
         const generatedWords = [];
 
-        for (let index = 0; index < amount; index++) {
-          const randomIndex =
-            Math.floor(Math.random() * words.length);
+        for (
+          let index = 0;
+          index < amount;
+          index++
+        ) {
 
-          generatedWords.push(
-            words[randomIndex]
-          );
+          let randomWord =
+            words[
+            Math.floor(
+              Math.random() * words.length
+            )
+            ];
+
+
+          // Apply Caps
+          if (enableCaps) {
+            randomWord =
+              randomWord.charAt(0).toUpperCase() +
+              randomWord.slice(1);
+          }
+
+          // Apply Numbers
+          if (enableNumbers) {
+
+            const number =
+              Math.floor(
+                Math.random() * 10
+              );
+
+            randomWord += number;
+          }
+
+          // Apply Punctuation
+          if (enablePunctuation) {
+
+            const punctuationList = [
+              "!",
+              "?",
+              ".",
+              ","
+            ];
+
+            randomWord +=
+              punctuationList[
+              Math.floor(
+                Math.random() *
+                punctuationList.length
+              )
+              ];
+          }
+
+          generatedWords.push(randomWord);
+
         }
-
         return generatedWords;
       }
 
 
       // CREATE WORD ELEMENT
-
       function createWordElement(word, wordIndex) {
+
         const wordSpan = document.createElement("span");
 
         wordSpan.className = "typing-word";
@@ -445,112 +592,85 @@
 
         });
 
+
         if (wordIndex === currentWordIndex) {
-          wordSpan.classList.add("current-word");
+
+          wordSpan.classList.add(
+            "current-word"
+          );
+
         }
 
         return wordSpan;
+
       }
 
 
-      // DISPLAY INITIAL WORDS
-
+      // DISPLAY WORDS
       function displayWords() {
+
         wordBox.innerHTML = "";
 
         const visibleWordCount = 6;
 
-        const wordsToDisplay =
-          Math.min(
-            visibleWordCount,
-            gameWords.length
-          );
+        const wordsToDisplay = Math.min(
+          visibleWordCount,
+          gameWords.length
+        );
 
         for (
-          let wordIndex = 0;
-          wordIndex < wordsToDisplay;
-          wordIndex++
+          let index = 0;
+          index < wordsToDisplay;
+          index++
         ) {
 
           const wordElement =
             createWordElement(
-              gameWords[wordIndex],
-              wordIndex
+              gameWords[index],
+              index
             );
 
-          wordBox.appendChild(wordElement);
+          wordBox.appendChild(
+            wordElement
+          );
         }
       }
 
+      // MASTER MODE CHECK
+      function checkImmediateFailure() {
 
-      // APPEND NEXT WORD
+        const currentWord = gameWords[currentWordIndex];
+        const typedWord = getCurrentTypedWord();
 
-      function appendNextWord() {
-        const displayedWords =
-          wordBox.querySelectorAll(".typing-word");
-
-        if (displayedWords.length === 0) {
+        if (
+          typedWord.length === 0
+        ) {
           return;
         }
 
-        const lastDisplayedWord =
-          displayedWords[
-          displayedWords.length - 1
-          ];
+        if (
+          !currentWord.startsWith(typedWord)
+        ) {
 
-        const lastDisplayedIndex =
-          Number(
-            lastDisplayedWord.dataset.wordIndex
-          );
+          endGame(true, "Master mode failed: incorrect character.");
 
-        const nextWordIndex =
-          lastDisplayedIndex + 1;
-
-        if (nextWordIndex >= gameWords.length) {
-          gameWords.push(
-            ...generateGameWords(50)
-          );
         }
-
-        const newWordElement =
-          createWordElement(
-            gameWords[nextWordIndex],
-            nextWordIndex
-          );
-
-        wordBox.appendChild(newWordElement);
-      }
-
-
-      // KEEP CURRENT WORD VISIBLE
-
-      function scrollCurrentWordIntoView() {
-        const currentWordElement =
-          wordBox.querySelector(
-            `[data-word-index="${currentWordIndex}"]`
-          );
-
-        if (!currentWordElement) {
-          return;
-        }
-
-        currentWordElement.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-          inline: "nearest"
-        });
       }
 
       // START GAME
-
       function startGame() {
+
         clearInterval(timer);
 
-        loadGameSettings();
+        document
+          .querySelectorAll(".option-button")
+          .forEach(function (button) {
+            button.disabled = true;
+          });
+
 
         timeLeft = selectedDuration;
         elapsedSeconds = 0;
-
         currentWordIndex = 0;
 
         correctWords = 0;
@@ -561,17 +681,16 @@
 
         running = true;
 
-        gameWords = generateGameWords(120);
+        gameWords = generateGameWords(selectedWordCount);
 
         timeText.textContent = timeLeft;
-        wordCountText.textContent = "0";
+        durationText.textContent = selectedDuration;
+        timeText.textContent = selectedDuration;
+        currentWordCountText.textContent = "0";
         wpmText.textContent = "0";
         accuracyText.textContent = "100";
-
         gameState.textContent = "In progress";
-
         message.textContent = "";
-        message.className = "game-message";
 
         startBtn.disabled = true;
         restartBtn.disabled = false;
@@ -580,24 +699,20 @@
 
         input.value = "";
 
-        input.placeholder =
-          "Start typing here...";
+        input.placeholder = "Start typing here...";
 
         displayWords();
 
         input.focus();
 
-
         timer = setInterval(function () {
 
           timeLeft--;
-
           elapsedSeconds++;
 
           timeText.textContent = timeLeft;
 
           updateStatistics();
-
 
           if (timeLeft <= 0) {
 
@@ -605,15 +720,12 @@
               false,
               "Time completed."
             );
-
           }
 
         }, 1000);
       }
 
-
       // INPUT HANDLING
-
       input.addEventListener(
         "input",
         function () {
@@ -622,158 +734,17 @@
             return;
           }
 
-
-          input.value =
-            input.value.replace(
-              /\n/g,
-              ""
-            );
-
+          input.value = input.value.replace(/\n/g, "");
 
           updateCharacterHighlighting();
 
-
-          if (
-            selectedDifficulty === "Master"
-          ) {
-
+          if (selectedDifficulty === "Master") {
             checkImmediateFailure();
-
           }
-
         }
       );
 
-
-      // GET CURRENT TYPED WORD
-
-      function getCurrentTypedWord() {
-        return input.value.trim();
-      }
-
-
-      // CHARACTER HIGHLIGHTING
-
-      function updateCharacterHighlighting() {
-
-        if (blindMode === "on") {
-          return;
-        }
-
-        const currentWordElement =
-          wordBox.querySelector(
-            `[data-word-index="${currentWordIndex}"]`
-          );
-
-        if (!currentWordElement) {
-          return;
-        }
-
-        const correctWord =
-          gameWords[currentWordIndex];
-
-        const typedWord =
-          getCurrentTypedWord();
-
-        const characterElements =
-          currentWordElement.querySelectorAll(
-            ".typing-character"
-          );
-
-        characterElements.forEach(
-          function (
-            characterElement,
-            characterIndex
-          ) {
-
-            characterElement.classList.remove(
-              "correct-character",
-              "incorrect-character"
-            );
-
-            if (
-              characterIndex >= typedWord.length
-            ) {
-              return;
-            }
-
-            if (
-              typedWord[characterIndex] ===
-              correctWord[characterIndex]
-            ) {
-
-              characterElement.classList.add(
-                "correct-character"
-              );
-
-            } else {
-
-              characterElement.classList.add(
-                "incorrect-character"
-              );
-
-            }
-
-          }
-        );
-
-      }
-
-      // MASTER MODE
-
-      function checkImmediateFailure() {
-
-        const typedWord =
-          getCurrentTypedWord();
-
-        const correctWord =
-          gameWords[currentWordIndex];
-
-        for (
-          let index = 0;
-          index < typedWord.length;
-          index++
-        ) {
-
-          if (
-            typedWord[index] !==
-            correctWord[index]
-          ) {
-
-            incorrectCharacters++;
-
-            endGame(
-              true,
-              selectedDifficulty +
-              " mode failed: an incorrect character was typed."
-            );
-
-            return;
-
-          }
-
-        }
-
-        if (
-          typedWord.length >
-          correctWord.length
-        ) {
-
-          incorrectCharacters++;
-
-          endGame(
-            true,
-            selectedDifficulty +
-            " mode failed: too many characters were typed."
-          );
-
-        }
-
-      }
-
-
-      // SUBMIT WORD USING SPACE OR ENTER
-
+      // SUBMIT WORD
       input.addEventListener(
         "keydown",
         function (event) {
@@ -791,46 +762,98 @@
 
           event.preventDefault();
 
-
           submitCurrentWord();
 
         }
       );
 
 
-      // SUBMIT CURRENT WORD
+      // GET CURRENT WORD
+      function getCurrentTypedWord() {
 
+        return input.value.trim();
+
+      }
+
+
+      // CHARACTER HIGHLIGHTING
+      function updateCharacterHighlighting() {
+
+        if (blindMode === "on") {
+          return;
+        }
+
+        const currentWordElement = wordBox.querySelector(
+          `[data-word-index="${currentWordIndex}"]`
+        );
+
+
+        if (!currentWordElement) {
+          return;
+        }
+
+        const correctWord = gameWords[currentWordIndex];
+        const typedWord = getCurrentTypedWord();
+        const characters = currentWordElement.querySelectorAll(
+          ".typing-character"
+        );
+
+        characters.forEach(
+          function (character, index) {
+
+            character.classList.remove(
+              "correct-character",
+              "incorrect-character"
+            );
+
+            if (index >= typedWord.length) {
+              return;
+            }
+
+            if (
+              typedWord[index] === correctWord[index]
+            ) {
+
+              character.classList.add(
+                "correct-character"
+              );
+
+            } else {
+
+              character.classList.add(
+                "incorrect-character"
+              );
+            }
+          }
+        );
+      }
+
+
+      // SUBMIT CURRENT WORD
       function submitCurrentWord() {
 
-        const typedWord =
-          getCurrentTypedWord();
-
+        const typedWord = getCurrentTypedWord();
 
         if (typedWord === "") {
           return;
         }
 
-        const correctWord =
-          gameWords[currentWordIndex];
+        const correctWord = gameWords[currentWordIndex];
 
-        const wordElement =
-          wordBox.querySelector(
-            `[data-word-index="${currentWordIndex}"]`
-          );
+        const wordElement = wordBox.querySelector(
+          `[data-word-index="${currentWordIndex}"]`
+        );
 
         if (!wordElement) {
           return;
         }
-
-        const isCorrect =
-          typedWord === correctWord;
 
         countCharacters(
           typedWord,
           correctWord
         );
 
-        if (isCorrect) {
+        if (typedWord === correctWord) {
 
           correctWords++;
 
@@ -838,11 +861,9 @@
             "completed-correct-word"
           );
 
-          message.textContent =
-            "Correct!";
+          message.textContent = "Correct!";
 
-          message.className =
-            "game-message correct-message";
+          message.className = "game-message correct-message";
 
         } else {
 
@@ -852,30 +873,21 @@
             "completed-incorrect-word"
           );
 
-          message.textContent =
-            'Incorrect. The correct word was "' +
-            correctWord +
-            '".';
+          message.textContent = "Incorrect. The correct word was \"" + correctWord + "\".";
 
-          message.className =
-            "game-message incorrect-message";
+          message.className = "game-message incorrect-message";
 
-          if (
-            selectedDifficulty === "Expert"
-          ) {
-
-            updateStatistics();
+          if (selectedDifficulty === "Expert") {
 
             endGame(
               true,
-              "Expert mode failed: an incorrect word was submitted."
+              "Expert mode failed: incorrect word."
             );
 
             return;
-
           }
-
         }
+
 
         wordElement.classList.remove(
           "current-word"
@@ -888,22 +900,19 @@
         ) {
 
           gameWords.push(
-            ...generateGameWords(50)
+            ...generateGameWords(selectedWordCount)
           );
 
         }
 
-        const nextWordElement =
-          wordBox.querySelector(
-            `[data-word-index="${currentWordIndex}"]`
-          );
+        const nextWord = wordBox.querySelector(
+          `[data-word-index="${currentWordIndex}"]`
+        );
 
-        if (nextWordElement) {
-
-          nextWordElement.classList.add(
+        if (nextWord) {
+          nextWord.classList.add(
             "current-word"
           );
-
         }
 
         appendNextWord();
@@ -911,22 +920,67 @@
         input.value = "";
 
         updateStatistics();
-
-        updateCharacterHighlighting();
-
-        scrollCurrentWordIntoView();
-
       }
 
 
-      // CHARACTER COUNTING
+      // ADD NEXT WORD
+      function appendNextWord() {
 
+        const displayedWords =
+          wordBox.querySelectorAll(
+            ".typing-word"
+          );
+
+        if (displayedWords.length === 0) {
+          return;
+        }
+
+        const lastWord =
+          displayedWords[
+          displayedWords.length - 1
+          ];
+
+
+        const nextIndex =
+          Number(
+            lastWord.dataset.wordIndex
+          ) + 1;
+
+
+        if (
+          nextIndex >= gameWords.length
+        ) {
+
+          gameWords.push(
+            ...generateGameWords(selectedWordCount)
+          );
+
+        }
+
+        const nextWordElement =
+          createWordElement(
+            gameWords[nextIndex],
+            nextIndex
+          );
+
+        wordBox.appendChild(
+          nextWordElement
+        );
+
+        nextWordElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+
+      }
+
+      // COUNT CHARACTERS
       function countCharacters(
         typedWord,
         correctWord
       ) {
 
-        const longestLength =
+        const length =
           Math.max(
             typedWord.length,
             correctWord.length
@@ -934,13 +988,12 @@
 
         for (
           let index = 0;
-          index < longestLength;
+          index < length;
           index++
         ) {
 
           if (
-            typedWord[index] ===
-            correctWord[index]
+            typedWord[index] === correctWord[index]
           ) {
 
             correctCharacters++;
@@ -950,39 +1003,27 @@
             incorrectCharacters++;
 
           }
-
         }
-
       }
 
-
       // UPDATE STATISTICS
-
       function updateStatistics() {
 
-        const submittedWords =
-          correctWords +
-          incorrectWords;
-
-        const totalCharacters =
-          correctCharacters +
-          incorrectCharacters;
+        const totalCharacters = correctCharacters + incorrectCharacters;
 
         const accuracy =
           totalCharacters === 0
             ? 100
             : Math.round(
-              (
-                correctCharacters /
-                totalCharacters
-              ) * 100
+              correctCharacters /
+              totalCharacters *
+              100
             );
 
-        const minutes =
-          elapsedSeconds / 60;
+        const minutes = elapsedSeconds / 60;
 
         const wpm =
-          minutes <= 0
+          minutes === 0
             ? 0
             : Math.round(
               correctCharacters /
@@ -990,106 +1031,91 @@
               minutes
             );
 
-        wordCountText.textContent =
-          submittedWords;
-
-        accuracyText.textContent =
-          accuracy;
+        currentWordCountText.textContent = correctWords + incorrectWords;
+        accuracyText.textContent = accuracy;
 
         wpmText.textContent =
           Math.max(
             0,
             wpm
           );
-
       }
 
 
       // END GAME
-
       function endGame(
-        didFail,
+        failed,
         reason
       ) {
 
         clearInterval(timer);
 
         running = false;
+
+        document
+          .querySelectorAll(".option-button")
+          .forEach(function (button) {
+
+            button.disabled = false;
+
+          });
+
         input.disabled = true;
+
         startBtn.disabled = false;
         restartBtn.disabled = false;
 
         updateStatistics();
 
+        const finalAccuracy = Number(accuracyText.textContent);
+
+        if (
+          finalAccuracy < minimumAccuracy
+        ) {
+
+          failed = true;
+          reason = "Minimum accuracy requirement not reached.";
+
+        }
+
         gameState.textContent =
-          didFail
+          failed
             ? "Failed"
             : "Finished";
 
-        message.textContent =
-          reason;
-
-        message.className =
-          didFail
-            ? "game-message incorrect-message"
-            : "game-message correct-message";
-
-        const submittedWords =
-          correctWords +
-          incorrectWords;
-
-        const totalCharacters =
-          correctCharacters +
-          incorrectCharacters;
-
-        const finalAccuracy =
-          totalCharacters === 0
-            ? 100
-            : Math.round(
-              (
-                correctCharacters /
-                totalCharacters
-              ) * 100
-            );
-
-        const secondsPlayed =
-          Math.max(
-            1,
-            selectedDuration - timeLeft
-          );
-
-        const finalWpm =
-          Math.round(
-            correctCharacters /
-            5 /
-            (
-              secondsPlayed /
-              60
-            )
-          );
-
-        const score =
-          Math.max(
-            0,
-            correctWords * 10 -
-            incorrectWords * 5
-          );
+        message.textContent = reason;
 
         const result = {
 
-          username: getLoggedInUser() || "Guest",
-          score: score,
-          wpm: Math.max( 0, finalWpm ),
-          accuracy: finalAccuracy,
+          username:
+            getLoggedInUser() ||
+            "Guest",
+
+          score:
+            Math.max(
+              0,
+              correctWords * 10 -
+              incorrectWords * 5
+            ),
+
+          wpm:
+            Number(
+              wpmText.textContent
+            ),
+
+          accuracy:
+            Number(
+              accuracyText.textContent
+            ),
+
           correctWords: correctWords,
-          incorrectWords: incorrectWords,
-          totalWords: submittedWords,
+          totalWords: correctWords + incorrectWords,
           difficulty: selectedDifficulty,
           duration: selectedDuration,
-          failed: didFail,
-          failureReason: didFail ? reason : ""
+          failed: failed
 
         };
+
 
         sessionStorage.setItem(
           "latestGameResult",
@@ -1098,87 +1124,196 @@
 
         saveScore(result);
 
-        // Redirect to EJS result route
-        setTimeout(function () {
+        setTimeout(
+          function () {
 
-          window.location.href = "/result";
+            window.location.href = "/result";
 
-        }, 1000);
-
+          },
+          1000
+        );
       }
 
 
-      // SAVE SCORE
+      // SAVE SCORE TO LEADERBOARD
+      async function saveScore(result) {
 
-      function saveScore(result) {
+        const username = getLoggedInUser();
 
-        const username =
-          getLoggedInUser();
-
-
-        // Guest scores are not saved
         if (!username) {
           return;
         }
 
-        const storageKey =
-          "typerush-leaderboard";
+        if (
+          result.duration !== 20 &&
+          result.duration !== 30
+        ) {
+          return;
+        }
 
-        let scores = [];
 
         try {
 
-          const savedScores =
-            localStorage.getItem(
-              storageKey
-            );
+          await fetch("/api/leaderboard", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
 
-          scores =
-            savedScores
-              ? JSON.parse(savedScores)
-              : [];
-
-          if (!Array.isArray(scores)) {
-
-            scores = [];
-
-          }
+            body: JSON.stringify({
+              username: username,
+              score: result.score,
+              wpm: result.wpm,
+              accuracy: result.accuracy,
+              timeLimit: result.duration,
+              difficulty: result.difficulty
+            })
+          });
 
         } catch (error) {
 
-          scores = [];
-
+          console.error(
+            "Failed to save score:",
+            error
+          );
         }
+      }
 
-        const newScore = {
 
-          username: username,
-          score: Number(result.score),
-          accuracy: Number(result.accuracy),
-          timeLimit: Number(result.duration),
-          difficulty: result.difficulty,
-          wpm: Number(result.wpm)
+      // GAME OPTION BUTTONS
+      document
+        .querySelectorAll(".time-option")
+        .forEach((button) => {
 
-        };
+          button.addEventListener(
+            "click",
+            function () {
 
-        scores.push(newScore);
+              selectedDuration = Number(this.dataset.time);
 
-        scores.sort(function (first, second) {
+              document
+                .querySelectorAll(".time-option")
+                .forEach(btn =>
+                  btn.classList.remove("active")
+                );
 
-          return second.score - first.score;
+              this.classList.add("active");
+
+              durationText.textContent = selectedDuration;
+              timeText.textContent = selectedDuration;
+
+              saveGameSettings();
+            }
+          );
+        });
+
+      document.querySelectorAll(".word-option")
+        .forEach(function (button) {
+
+          button.addEventListener(
+            "click",
+            function () {
+
+              document
+                .querySelectorAll(".word-option")
+                .forEach(
+                  btn =>
+                    btn.classList.remove("active")
+                );
+
+
+              this.classList.add("active");
+
+              selectedWordCount = Number(this.dataset.word);
+              wordCountText.textContent = selectedWordCount;
+
+              saveGameSettings();
+
+            }
+          );
 
         });
 
-        localStorage.setItem(
-          storageKey,
-          JSON.stringify(scores)
-        );
+
+      document.querySelectorAll(".feature-option")
+        .forEach(function (button) {
+
+          button.addEventListener(
+            "click",
+            function () {
+
+              if (running) {
+                return;
+              }
+
+              this.classList.toggle("active");
+
+              const feature = this.dataset.feature;
+
+              if (feature === "punctuation") {
+                enablePunctuation = this.classList.contains("active");
+              }
+
+              if (feature === "numbers") {
+                enableNumbers = this.classList.contains("active");
+              }
+
+              if (feature === "caps") {
+                enableCaps = this.classList.contains("active");
+              }
+              saveGameSettings();
+            }
+          );
+        });
+
+
+
+      // RESTORE BUTTON STATES
+      function restoreButtonStates() {
+
+        document
+          .querySelectorAll(".time-option")
+          .forEach(function (button) {
+
+            button.classList.toggle(
+              "active",
+              Number(button.dataset.time) === selectedDuration
+            );
+
+          });
+
+
+        document
+          .querySelectorAll(".word-option")
+          .forEach(function (button) {
+
+            button.classList.toggle(
+              "active",
+              Number(button.dataset.word) === selectedWordCount
+            );
+
+          });
+
+
+        document
+          .querySelectorAll(".feature-option")
+          .forEach(function (button) {
+
+            const feature =
+              button.dataset.feature;
+
+
+            button.classList.toggle(
+              "active",
+              (feature === "punctuation" && enablePunctuation) ||
+              (feature === "numbers" && enableNumbers) ||
+              (feature === "caps" && enableCaps)
+            );
+
+          });
 
       }
 
 
       // BUTTON CONNECTIONS
-
       startBtn.addEventListener(
         "click",
         startGame
@@ -1192,12 +1327,10 @@
 
 
       // PAGE STARTUP
-
       loadUser();
-
       loadGameSettings();
+      restoreButtonStates();
 
     </script>
-
 
     <%- include('partials/footer') %>
