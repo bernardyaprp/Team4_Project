@@ -34,8 +34,7 @@
 
 
       <!-- Login/Register -->
-      <section class="account-card">
-
+      <section class="account-card" id="accountPanel">
 
         <div>
 
@@ -43,12 +42,10 @@
             Save Your Progress
           </h2>
 
-
           <p>
             Create an account or login to save your typing records
             and appear on the leaderboard.
           </p>
-
 
         </div>
 
@@ -62,12 +59,9 @@
             Register
           </a>
 
-
         </div>
 
-
       </section>
-
 
       <section class="card">
 
@@ -83,7 +77,7 @@
             </span>
 
             <span class="stat-value">
-              Improve your typing speed.
+              Improve your typing speed by practising against the clock.
             </span>
           </div>
 
@@ -94,7 +88,7 @@
             </span>
 
             <span class="stat-value">
-              Increase typing accuracy.
+              Improve accuracy and reduce typing mistakes through practice.
             </span>
           </div>
 
@@ -105,7 +99,7 @@
             </span>
 
             <span class="stat-value">
-              Compete with other players.
+              Compare your scores and compete with other players.
             </span>
           </div>
 
@@ -116,7 +110,7 @@
             </span>
 
             <span class="stat-value">
-              Normal, Expert and Master.
+              Choose from Normal, Expert, and Master difficulty levels.
             </span>
           </div>
 
@@ -125,6 +119,14 @@
       </section>
 
     </main>
+
+    <script>
+      const currentUser = localStorage.getItem("typerush-current-user");
+
+      if (currentUser) {
+        document.getElementById("accountPanel").style.display = "none";
+      }
+    </script>
 
     <footer class="home-footer">
 
