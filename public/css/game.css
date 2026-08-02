@@ -1001,6 +1001,60 @@ input {
   background: #dbeafe;
 }
 
+#notSignedInBox {
+  padding: 2rem;
+}
+
+#notSignedInBox h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #1e293b;
+}
+
+#notSignedInBox p {
+  color: #475569;
+  margin-bottom: 1.25rem;
+}
+
+#signInButton {
+  background: #4f75d8;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#signInButton:hover {
+  background: #3d62c2;
+}
+
+.leaderboard-header h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.leaderboard-header p {
+  color: #475569;
+}
+
+.difficulty-btn {
+  border: 1px solid #cbd5e1;
+  background: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.difficulty-btn.active {
+  background: #4f75d8;
+  color: white;
+  border-color: #4f75d8;
+}
+
 /* =========================================
    LOGIN / REGISTER
 ========================================= */
@@ -1056,6 +1110,44 @@ input {
 
 .auth-message.success {
   color: #16a34a;
+}
+
+.auth-card {
+  padding: 2rem;
+}
+
+.auth-card h2 {
+  font-size: 2rem;
+  margin-bottom: .75rem;
+  color: #1e293b;
+}
+
+.auth-card p {
+  color: #475569;
+}
+
+.auth-form button {
+  background: #4f75d8;
+  color: white;
+  border: none;
+  padding: .85rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-form button:hover {
+  background: #3d62c2;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: #4f75d8;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
 }
 
 /* Game Customisation Settings */
