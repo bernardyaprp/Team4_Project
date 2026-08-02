@@ -104,8 +104,8 @@
   </main>
 
   <script>
-    const API_BASE_URL = 'http://localhost:3000';
     const USER_STORAGE_KEY = 'typerush-current-user';
+    const LEADERBOARD_STORAGE_KEY = 'typerush-leaderboard';
 
     const currentUser = localStorage.getItem(USER_STORAGE_KEY);
     const notSignedInBox = document.getElementById('notSignedInBox');
@@ -195,7 +195,7 @@
         .sort((a, b) => b.score - a.score);
     }
 
-    async function loadLeaderboard(timeLimit) {
+    function loadLeaderboard(timeLimit) {
       leaderboardTable.innerHTML = '';
 
       leaderboardMessage.textContent =
@@ -205,33 +205,27 @@
         'auth-message';
 
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/leaderboard?timeLimit=${encodeURIComponent(timeLimit)}`
-        );
+        const savedScores =
+          localStorage.getItem(LEADERBOARD_STORAGE_KEY);
 
-        const contentType =
-          response.headers.get('content-type') || '';
+        const allScores =
+          savedScores ? JSON.parse(savedScores) : [];
 
-        const result =
-          contentType.includes('application/json')
-            ? await response.json()
-            : { message: await response.text() };
-
-        if (!response.ok) {
-          throw new Error(
-            result.message ||
-            'Unable to load the leaderboard.'
-          );
-        }
+        const scoresForMode =
+          Array.isArray(allScores)
+            ? allScores.filter((item) =>
+                Number(item.timeLimit) === Number(timeLimit)
+              )
+            : [];
 
         displayScores(
-          normaliseScores(result)
+          normaliseScores(scoresForMode)
         );
 
       } catch (error) {
 
         leaderboardMessage.textContent =
-          `${error.message} Check that the server is running and that GET /api/leaderboard is available.`;
+          'Unable to read saved scores from this browser.';
 
         leaderboardMessage.className =
           'auth-message error';
