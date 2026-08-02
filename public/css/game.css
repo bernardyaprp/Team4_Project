@@ -28,56 +28,45 @@ input {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 25px;
-  padding: 14px 4%;
-  color: white;
-  background:
-    linear-gradient(90deg,
-      #4d9aec,
-      #72b5f4);
-  box-shadow: 0 5px 18px rgba(37, 99, 235, 0.18);
+  padding: 18px 70px;
+  background: linear-gradient(135deg, #5b8fe8, #75a8ed);
+  min-height: 70px;
 }
 
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+}
+
+.logo span {
+  font-size: 24px;
+  font-weight: 800;
+  color: white;
+}
+
+.site-logo {
+  width: 35px;
+  height: 35px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.logo-link {
+  text-decoration: none;
+}
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 35px;
 }
 
 .nav-links a {
-  padding: 8px 11px;
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  border-radius: 7px;
-  font-size: 14px;
-}
-
-.nav-links a:hover,
-.nav-links a.active {
-  color: #2563eb;
-  background: white;
-}
-
-.logo {
-  display: inline-flex;
-  align-items: center;
-  color: white;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  text-decoration: none;
-}
-
-.logo:visited {
-  color: white;
-}
-
-.logo:hover {
   color: white;
   text-decoration: none;
 }
-
 
 
 /* SHARED LAYOUT */
