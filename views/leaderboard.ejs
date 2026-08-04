@@ -85,7 +85,6 @@
 
     <script>
       const USER_STORAGE_KEY = 'typerush-current-user';
-      const LEADERBOARD_STORAGE_KEY = 'typerush-leaderboard';
 
       const currentUser = localStorage.getItem(USER_STORAGE_KEY);
       const notSignedInBox = document.getElementById('notSignedInBox');
@@ -175,7 +174,7 @@
           .sort((a, b) => b.score - a.score);
       }
 
-      function loadLeaderboard(timeLimit) {
+      async function loadLeaderboard(timeLimit) {
         leaderboardTable.innerHTML = '';
 
         leaderboardMessage.textContent =
@@ -185,27 +184,28 @@
           'auth-message';
 
         try {
-          const savedScores =
-            localStorage.getItem(LEADERBOARD_STORAGE_KEY);
+          const response = await fetch(
+            `/api/leaderboard?timeLimit=${encodeURIComponent(timeLimit)}`
+          );
 
-          const allScores =
-            savedScores ? JSON.parse(savedScores) : [];
+          const result = await response.json();
 
-          const scoresForMode =
-            Array.isArray(allScores)
-              ? allScores.filter((item) =>
-                  Number(item.timeLimit) === Number(timeLimit)
-                )
-              : [];
+          if (!response.ok) {
+            throw new Error(
+              result.message ||
+              'Unable to load the leaderboard.'
+            );
+          }
 
           displayScores(
-            normaliseScores(scoresForMode)
+            normaliseScores(result)
           );
 
         } catch (error) {
 
           leaderboardMessage.textContent =
-            'Unable to read saved scores from this browser.';
+            error.message ||
+            'Unable to load the leaderboard.';
 
           leaderboardMessage.className =
             'auth-message error';
